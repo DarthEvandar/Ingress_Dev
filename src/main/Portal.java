@@ -17,6 +17,7 @@ public class Portal {
 	int l6num;
 	int l7num;
 	int l8num;
+	int curSlot=0;
 	ArrayList<String> linked = new ArrayList<String>();
 	ArrayList<Resonator> resonators = new ArrayList<Resonator>();
 	ArrayList<Mod> mods = new ArrayList<Mod>();
@@ -25,7 +26,14 @@ public class Portal {
 		pX = x;
 		alignment = "ntrl";
 		name = n;
-		mods.add(new Shield(""));
+		
+	}
+	public void addMod(String type, int slot){
+		if(curSlot==4){
+			return;
+		}
+		curSlot++;
+		mods.add(new Mod(type,slot));
 	}
 	public void setRes(int a){
 		numRes = a;
