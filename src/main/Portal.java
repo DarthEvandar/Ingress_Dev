@@ -1,7 +1,6 @@
 package main;
 
 import java.util.ArrayList;
-import java.util.Collections;
 
 public class Portal {
 	int pX;
@@ -18,6 +17,7 @@ public class Portal {
 	int l7num;
 	int l8num;
 	int curSlot=0;
+	int shielding = 0;
 	ArrayList<String> linked = new ArrayList<String>();
 	ArrayList<Resonator> resonators = new ArrayList<Resonator>();
 	ArrayList<Mod> mods = new ArrayList<Mod>();
@@ -28,12 +28,19 @@ public class Portal {
 		name = n;
 		
 	}
-	public void addMod(String type, int slot){
+	public Mod getMod(int a){
+		return mods.get(a);
+	}
+	public void addMod(String type){
 		if(curSlot==4){
+			System.out.println("full");
 			return;
+		}		
+		mods.add(new Mod(type,curSlot));
+		if(type.equals("Shield")){
+			shielding +=300;
 		}
 		curSlot++;
-		mods.add(new Mod(type,slot));
 	}
 	public void setRes(int a){
 		numRes = a;

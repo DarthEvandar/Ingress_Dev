@@ -1,5 +1,7 @@
-170
-50
-ntrl
-0
-0
+x170
+y50
+tntrl
+n1
+mntrl
+r0
+w0

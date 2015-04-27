@@ -1,5 +1,7 @@
-290
-350
-ntrl
-0
-0
+x290
+y350
+tntrl
+n1
+mntrl
+r0
+w0

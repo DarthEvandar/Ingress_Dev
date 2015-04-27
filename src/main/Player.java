@@ -28,7 +28,7 @@ public class Player{
 			e.printStackTrace();
 		}
 		ap = Integer.parseInt(s);
-		addAp(0);
+		addAp(1);
 	}
 	public int pLevel(){
 		return level;

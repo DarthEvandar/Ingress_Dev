@@ -1,5 +1,7 @@
-380
-40
-ntrl
-0
-0
+x380
+y40
+tntrl
+n1
+mntrl
+r0
+w0

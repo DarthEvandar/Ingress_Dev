@@ -1,5 +1,7 @@
-340
-70
-ntrl
-0
-0
+x340
+y70
+tntrl
+n1
+mntrl
+r0
+w0

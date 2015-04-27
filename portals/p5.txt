@@ -1,5 +1,7 @@
-300
-100
-ntrl
-0
-0
+x300
+y100
+tntrl
+n1
+mntrl
+r0
+w0

@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -64,8 +65,10 @@ public class Main extends JPanel implements Runnable{
 	Bag b = new HashBag();
 	Bag k = new HashBag();
 	Bag bb = new HashBag();
+	Bag mm = new HashBag();
 	Player p;
 	boolean rightTrue,leftTrue,upTrue,downTrue = false;
+	boolean modPar = true;
 	public void start(){
 		if(runner==null){
 			runner = new Thread(this);
@@ -169,7 +172,7 @@ public class Main extends JPanel implements Runnable{
 		portals.add(new Portal(290,350,"p12"));
 		portals.add(new Portal(350,450,"p13"));
 		portals.add(new Portal(600,500,"p14"));*/
-		File[] ports = new File("portals").listFiles();
+		final File[] ports = new File("portals").listFiles();
 		List<String> lines = new ArrayList<String>();
 		for(File f:ports){
 			try{
@@ -179,16 +182,43 @@ public class Main extends JPanel implements Runnable{
 				e.printStackTrace();
 				System.exit(0);
 			}
-			portals.add(new Portal(Integer.parseInt(lines.get(0)),Integer.parseInt(lines.get(1)),f.getName().substring(0,f.getName().length()-4)));
+			portals.add(new Portal(Integer.parseInt(lines.get(0).substring(1)),Integer.parseInt(lines.get(1).substring(1)),f.getName().substring(0,f.getName().length()-4)));
 		}
 		
 			for(Portal initPortal:portals){
 				try {
+					List<String> fr = Files.readAllLines(Paths.get("portals\\"+initPortal.namee()+".txt"),Charset.defaultCharset());
 					BufferedReader pr = new BufferedReader(new FileReader("portals\\" + initPortal.namee()+".txt"));
 					//initPortal.setRes(Integer.parseInt(pr.readLine()));
-					pr.readLine();
+					for(int i=2;i<fr.size();i++){
+						switch (fr.get(i).charAt(0)){
+							case 't':
+								initPortal.setAlign(fr.get(i).substring(1));
+								break;
+							case 'm':
+								initPortal.addMod(fr.get(i).substring(1));
+								break;
+							case 'l':
+								initPortal.addReso(Integer.parseInt(fr.get(i).substring(1)));
+								circ.add(new Ellipse2D.Float(Integer.parseInt(fr.get(i+1)),Integer.parseInt(fr.get(i+2)),5,5));
+								i++;
+								i++;
+								break;
+							case 'z':
+								initPortal.addLink(fr.get(i).substring(1));
+								break;
+							default:
+								System.out.println("bad char: "+fr.get(i));
+								break;								
+						}
+					}
+					/*pr.readLine();
 					pr.readLine();
 					initPortal.setAlign(pr.readLine());
+					String prr = pr.readLine();
+					for(int i=0;i<Integer.parseInt(prr);i++){
+						initPortal.addMod(pr.readLine());
+					}
 					//System.out.println(initPortal.team());
 					String tryy = pr.readLine();
 					if(tryy==null||tryy.equals("0")){}else{
@@ -211,7 +241,7 @@ public class Main extends JPanel implements Runnable{
 						initPortal.addLink(agg);
 						agg = pr.readLine();
 					}					
-					}				
+					}		*/		
 					//initPortal.addLink(pr.readLine());
 					//initPortal.name = pr.readLine();
 				} catch (FileNotFoundException e1) {
@@ -266,6 +296,23 @@ public class Main extends JPanel implements Runnable{
 		}
 		//
 		try{
+			BufferedReader modread = new BufferedReader(new FileReader("inventory\\mods.txt"));
+			String modr = modread.readLine();
+			while(modr!=null){
+				mm.add(new Mod(modr));
+				modr = modread.readLine();
+			}
+			
+			//mm.add(resr);
+			modread.close();
+			
+		}catch(FileNotFoundException e8){
+			e8.printStackTrace();
+		}catch(IOException e0){
+			e0.printStackTrace();
+		}
+		//
+		try{
 			BufferedReader linkRead = new BufferedReader(new FileReader("MU\\links.txt"));
 			String linkk = linkRead.readLine();
 			for(int i=0;i<Integer.parseInt(linkk);i++){
@@ -296,8 +343,30 @@ public class Main extends JPanel implements Runnable{
 				int y2 = Integer.parseInt(fieldRead.readLine());
 				int x3 = Integer.parseInt(fieldRead.readLine());
 				int y3 = Integer.parseInt(fieldRead.readLine());
+				int firstInd = 0;
+				String a1 = fieldRead.readLine();
+				Portal firstPortal = null;
+				for(Portal p:portals){
+					if(p.namee().equals(a1)){
+						firstPortal = p;
+					}
+				}
+				Portal secondPortal = null;
+				String a2 = fieldRead.readLine();
+				for(Portal p:portals){
+					if(p.toString().equals(a2)){
+						secondPortal = p;
+					}
+				}
+				Portal thirdPortal = null;
+				String a3 = fieldRead.readLine();
+				for(Portal p:portals){
+					if(p.namee().equals(a3)){
+						thirdPortal = p;
+					}
+				}
 				String teem = fieldRead.readLine();
-				fields.add(new Field(x1,y1,x2,y2,x3,y3,teem));
+				fields.add(new Field(x1,y1,x2,y2,x3,y3,teem,firstPortal,secondPortal,thirdPortal));
 				int[] xpoints = {x1,x2,x3};
 				int[] ypoints = {y1,y2,y3};
 				poly.add(new Polygon(xpoints,ypoints,3));
@@ -332,14 +401,14 @@ public class Main extends JPanel implements Runnable{
 		 
 		 getInputMap().put(KeyStroke.getKeyStroke("released S"),"rdown");
 		 getActionMap().put("rdown", rdown);
-		 final JButton team = new JButton("Resistance");
+		 final JButton team = new JButton("Enlightened");
 		 team.addActionListener(new java.awt.event.ActionListener(){
 			 public void actionPerformed(java.awt.event.ActionEvent evt){
 				 if(p.getAlign().equals("enl")){
 					p.setAlign("res");
-					team.setText("Enlightened");					
+					team.setText("Resistance");					
 				 }else{
-					team.setText("Resistance");
+					team.setText("Enlightened");
 					p.setAlign("enl");
 				 }
 				 Main.this.requestFocusInWindow();
@@ -350,7 +419,8 @@ public class Main extends JPanel implements Runnable{
 		 ops.addActionListener(new java.awt.event.ActionListener(){
 			 public void actionPerformed(java.awt.event.ActionEvent evt){
 				 JButton inventory = new JButton("Inventory");
-				 Object[] optionss = {inventory};
+				 JButton clearAll = new JButton("Clear");
+				 Object[] optionss = {inventory,clearAll};
 					JOptionPane optionPane = new JOptionPane(optionss);
 					final JFrame parent = new JFrame();					
 				     parent.add(optionPane);
@@ -364,7 +434,32 @@ public class Main extends JPanel implements Runnable{
 		    				 ((JFrame)(e.getComponent())).dispose();
 		    			 }
 		    			 
-		    		 });
+		    		 });			     
+				 clearAll.addActionListener(new java.awt.event.ActionListener(){
+				    @Override
+				    public void actionPerformed(java.awt.event.ActionEvent evt){
+				    	fields.clear();
+				    	links.clear();
+				    	for(File f:ports){
+				    		try {
+								new PrintWriter(f).close();
+							} catch (FileNotFoundException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+				    	}
+				    	for(Portal p:portals){
+					    	p.linked.clear();
+				    	}
+				    	try {
+							new PrintWriter("MU\\links.txt").close();
+					    	new PrintWriter("MU\\fields.txt").close();
+						} catch (FileNotFoundException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+				    }
+				 });				 
 				 inventory.addActionListener(new java.awt.event.ActionListener(){
 			    	 @Override
 			    	 public void actionPerformed(java.awt.event.ActionEvent evt){
@@ -441,16 +536,74 @@ public class Main extends JPanel implements Runnable{
 				    	 @Override
 				    	 public void actionPerformed(java.awt.event.ActionEvent evt){
 				    		 parent.setVisible(false);
-				    		 JFrame main = new JFrame();
+				    		 final JFrame main = new JFrame();
 				    		 main.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 				    		 main.addComponentListener(new ComponentAdapter(){
     			    			 @Override
     			    			 public void componentHidden(ComponentEvent e){				    			    				 	
-    			    				 	parent.setVisible(true);
+    			    				 	if(modPar)parent.setVisible(true);
     			    				 ((JFrame)(e.getComponent())).dispose();
     			    			 }
 				    		 });
-				    		 JPanel modList = new JPanel();
+				    		 final JPanel modList = new JPanel();
+				    		 for(int i=0;i<=3;i++){
+				    			 JButton slot = new JButton((portal.mods.size()-1>=i)?portal.getMod(i).getType():"Empty");
+				    			 modList.add(slot);
+				    			 if(slot.getText().equals("Empty")){
+				    			 slot.addActionListener(new java.awt.event.ActionListener(){
+		    				    	 @Override
+		    				    	 public void actionPerformed(java.awt.event.ActionEvent evt){
+		    				    		 main.setVisible(false);
+		    				    		 final JFrame main1 = new JFrame();
+		    				    		 main1.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+		    				    		 modPar=false;
+		    				    		 main1.addComponentListener(new ComponentAdapter(){
+		        			    			 @Override
+		        			    			 public void componentHidden(ComponentEvent e){		
+		        			    				 	modPar=true;
+		        			    				 	for(int updated=0;updated<=3;updated++){
+		        			    				 		JButton vari = (JButton)modList.getComponent(updated);
+		        			    				 		vari.setText((portal.mods.size()-1>=updated)?portal.getMod(updated).getType():"Empty");
+		        			    				 		modList.remove(updated);
+		        			    				 		if(!vari.getText().equals("Empty")&&vari.getActionListeners().length>0){
+		        			    				 			vari.removeActionListener(vari.getActionListeners()[0]);
+		        			    				 		}
+	        			    				 			modList.add(vari,updated);
+		        			    				 	}
+		        			    				 	main.setVisible(true);
+		        			    				 ((JFrame)(e.getComponent())).dispose();
+		        			    			 }
+		    				    		 });
+		    				    		 
+		    				    		 final JPanel myMods = new JPanel();
+		    				    		 for(Object mod:mm){
+		    				    			 final Mod modd = (Mod)mod;
+		    				    			 final JButton newMod = new JButton(modd.getType());
+		    				    			 newMod.addActionListener(new java.awt.event.ActionListener(){
+					    				    	 @Override
+					    				    	 public void actionPerformed(java.awt.event.ActionEvent evt){					    				    		 
+					    				    		 portal.addMod(modd.getType());
+					    				    		 mm.remove((Object)modd);
+					    				    		 myMods.remove(newMod);
+					    				    		 myMods.repaint();
+					    				    		 main1.pack();
+					    				    	 }
+		    				    			 });
+		    				    			 myMods.add(newMod);
+		    				    		 }
+		    				    		 JScrollPane scrl = new JScrollPane(myMods);
+		    				    		 main1.add(scrl);
+		    				    		 main1.pack();
+		    				    		 main1.setVisible(true);
+		    				    	 }
+				    			 });
+				    			 }
+				    		 }
+
+				    		 JScrollPane scr = new JScrollPane(modList);
+				    		 main.add(scr);
+				    		 main.pack();
+				    		 main.setVisible(true);
 				    	 }
 				    	 
 				     });
@@ -471,9 +624,7 @@ public class Main extends JPanel implements Runnable{
 					    	 firelev = 8;
 					    	 start();
 					    	 stop();
-				    		 
-				    	 }
-				    	 
+				    	 }				    	 
 				     });
 				     
 				     link.addActionListener(new java.awt.event.ActionListener(){
@@ -489,11 +640,11 @@ public class Main extends JPanel implements Runnable{
     			    				 ((JFrame)(e.getComponent())).dispose();
     			    			 }
 				    	 });
-				    		 JPanel keyList = new JPanel();
+				    		 final JPanel keyList = new JPanel();
 				    		 for(final Portal y:portals){
 				    			 if(y.namee().equals(portal.namee())){}else{
-				    				 if(y.numReses()==8&&portal.numReses()==8&&k.contains(y.namee())&&y.team().equals(portal.team())){
-				    					 JButton b = new JButton(y.namee());
+				    				 if(y.numReses()==8&&portal.numReses()==8&&k.contains(y.namee())&&y.team().equals(portal.team())&&!portal.isLinkedTo(y.namee())){
+				    					 final JButton b = new JButton(y.namee());
 				    					 ImageIcon ico = createImageIcon(y.namee() + ".png","");
 				    					 b.setIcon(ico);
 				    					 keyList.add(b);
@@ -532,10 +683,13 @@ public class Main extends JPanel implements Runnable{
 					    				    		repaint();
 					    				    		y.addLink(portal.namee());
 					    				    		portal.addLink(y.namee());
+					    				    		keyList.remove(b);
+					    				    		keyList.revalidate();
+					    				    		keyList.repaint();
 					    				    		if(y.links>=2&&portal.links>=2){
 					    				    			for(Portal ft:portals){
 					    				    				if(y.isLinkedTo(ft.namee())&&portal.isLinkedTo(ft.namee())&&!(ft.namee().equals(portal))){
-					    				    					fields.add(new Field(y.retX()+10,y.retY()+10,portal.retX()+10,portal.retY()+10,ft.retX()+10,ft.retY()+10,portal.team()));
+					    				    					fields.add(new Field(y.retX()+10,y.retY()+10,portal.retX()+10,portal.retY()+10,ft.retX()+10,ft.retY()+10,portal.team(),portal,y,ft));
 					    				    					poly.add(new Polygon(new int[]{y.retX()+10,portal.retX()+10,ft.retX()+10},new int[]{y.retY()+10,portal.retY()+10,ft.retY()+10},3));
 					    				    					System.out.println("field");
 					    				    					p.addAp(1563);
@@ -776,16 +930,14 @@ public class Main extends JPanel implements Runnable{
 					    	 System.out.println("ap: " + p.apLevel());
 					    	 System.out.println("Level: " + p.pLevel());
 					    	 System.out.println("Level 1 Resos: " + b.getCount(1));
-					    	 System.out.println("Resos on Portal: " + portal.resonators.size());
-					    	 
+					    	 System.out.println("Resos on Portal: " + portal.resonators.size());				    	 
 					     }
 				     });
 				     break;
 		    	   }										
 		    	}
 		     }
-		 });
-	}
+		 });}
 	public int calculateLevel(Player p,Portal po){
 		 Random randd = new Random();		 
 		 int lv = randd.nextInt(po.avgLevel()+2);
@@ -860,17 +1012,15 @@ public class Main extends JPanel implements Runnable{
 		Graphics2D g2d = (Graphics2D)g;
 		g2d.setColor(Color.BLACK);
 		//g2d.fill(player);	
-		
-		
+				
 		g.setColor(Color.BLACK);
 		
 		for(Field fi: fields){
-			if(fi.getTeam().equals("enl")){
-				
+			if(fi.getTeam().equals("enl")){				
 				g2d.setColor(new Color(0,255,0,50));
 				//Color.getHSBColor(1.0f, 0.5f, 12.0f)
 			}else if(fi.getTeam().equals("res")){
-				g2d.setColor(new Color(0,255,255,50));
+				g2d.setColor(new Color(0,150,255,50));
 			}
 			
 			int[]xs = {fi.getP1x(),fi.getP2x(),fi.getP3x()};
@@ -883,6 +1033,7 @@ public class Main extends JPanel implements Runnable{
 			g2d.draw(ln);
 		}*/
 		for(Link l:links){
+			//System.out.println(links.indexOf(l));
 			if(l.getTeam().equals("enl")){
 				g.setColor(Color.GREEN);
 			}else if(l.getTeam().equals("res")){
@@ -939,6 +1090,16 @@ public class Main extends JPanel implements Runnable{
 				g.setColor(Color.GREEN);				
 				}
 		g.drawOval(portal.retX(),portal.retY(),20,20);
+		if(portal.mods.size()>0){
+			for(int i=0;i<portal.mods.size();i++){
+				if(portal.mods.get(i).getType().equals("Shield")){
+					g2d.setColor(new Color(100,255,150,255));
+					g2d.drawOval(portal.retX()-5, portal.retY()-5, 30, 30);
+					break;
+				}
+			}
+			//g.drawOval(portal.retX()-5, portal.retY()-5, 30, 30);
+		}
 		}
 		g.setColor(Color.BLACK);
 		g.drawOval(x, y, 50, 50);
@@ -948,32 +1109,54 @@ public class Main extends JPanel implements Runnable{
 			
 				if(e.intersects(x+10-currentRadius/2,y+10-currentRadius/2,currentRadius,currentRadius)){
 					//System.out.println(e.getX() + " " + e.getY());
-					for(Portal por : portals){
-						for(Resonator res : por.resonators){
-							if(e.getX()==res.x&&e.getY()==res.y&&!p.align.equals(por.team())){								
-								res.damage(2000);
-								if(res.dead()){
-									por.resonators.remove(res);
-									por.numRes--;
-									if(por.numReses()==0){
-									por.setAlign("ntrl");
+					for(int por=0;por<portals.size();por++){
+						//CCM FIX
+						for(int res=0;res<portals.get(por).resonators.size();res++){
+						//for(Resonator res : portals.get(por).resonators){
+							if(e.getX()==portals.get(por).resonators.get(res).x&&e.getY()==portals.get(por).resonators.get(res).y&&!p.align.equals(portals.get(por).team())){								
+								portals.get(por).resonators.get(res).damage(2000-portals.get(por).shielding);
+								System.out.println((res+" "+(2000-portals.get(por).shielding)));
+								if(portals.get(por).resonators.get(res).dead()){
+									portals.get(por).resonators.remove(res);
+									portals.get(por).numRes--;
+									if(portals.get(por).numReses()<3){
+										for(int ln=0;ln<intr.size();ln++){
+											//for(Line2D ln : intr){
+												if(intr.get(ln).ptLineDist(portals.get(por).retX()+10, portals.get(por).retY()+10)==0){
+													intr.remove(intr.get(ln));
+													System.out.println("link removed");
+												}
+											}
+											for(int li=0;li<links.size();li++){
+											//for(Link li : links){
+												Line2D.Float line = new Line2D.Float(links.get(li).x1(),links.get(li).y1(),links.get(li).x2(),links.get(li).y2());
+												if(line.ptLineDist(portals.get(por).retX()+10, portals.get(por).retY()+10)==0){
+													//System.out.println(links.size());
+													links.remove(links.get(li)); 
+													//System.out.println(links.size());
+													System.out.println("link dead");
+													for(int fie=0;fie<fields.size();fie++){
+														if(fields.get(fie).porta.contains(portals.get(por))){
+															fields.remove(fie);
+														}
+														/*if(((fields.get(fie).getP1x()==line.getX1()&&fields.get(fie).getP1y()==line.getY1())||(fields.get(fie).getP1x()==line.getX2()&&fields.get(fie).getP1y()==line.getY2()))||
+														   ((fields.get(fie).getP2x()==line.getX1()&&fields.get(fie).getP2y()==line.getY1())||(fields.get(fie).getP2x()==line.getX2()&&fields.get(fie).getP2y()==line.getY2()))||
+														   ((fields.get(fie).getP3x()==line.getX1()&&fields.get(fie).getP3y()==line.getY1())||(fields.get(fie).getP3x()==line.getX2()&&fields.get(fie).getP3y()==line.getY2()))){
+															fields.remove(fie);
+														}*/
+													}
+												}
+											}
 									}
-									//por.linked.clear();
-									for(Line2D ln : intr){
-										if(ln.ptLineDist(por.retX()+10, por.retY()+10)==0){
-											intr.remove(ln);
-											System.out.println("link removed");
-										}
+									if(portals.get(por).numReses()==0){
+										portals.get(por).setAlign("ntrl");
+										portals.get(por).linked.clear();
+										portals.get(por).mods.clear();
 									}
-									for(Link li : links){
-										Line2D.Float line = new Line2D.Float(li.x1(),li.y1(),li.x2(),li.y2());
-										if(line.ptLineDist(por.retX()+10, por.retY()+10)==0){
-											links.remove(li); 
-											System.out.println("link dead");
-										}
-									}
+									
+									
 								}
-								System.out.println(res.getEnergy());
+								//System.out.println(portals.get(por).resonators.get(res).getEnergy());
 							}
 						}
 					}
