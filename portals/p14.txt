@@ -1,5 +1,7 @@
-600
-500
-ntrl
-0
-0
+x600
+y500
+tntrl
+n1
+mntrl
+r0
+w0

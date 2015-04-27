@@ -1,6 +1,5 @@
 package main;
 
-import java.awt.geom.Ellipse2D;
 
 public class Resonator extends Player{
 	int x;

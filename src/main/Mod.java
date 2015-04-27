@@ -14,4 +14,7 @@ public class Mod {
 		this.type = type;
 		this.slot = slot;
 	}
+	public Mod(String type){
+		this.type = type;
+	}
 }

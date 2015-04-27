@@ -47,10 +47,20 @@ public class Frame {
         			ee.printStackTrace();
         		}
     			try {
-					PrintWriter r = new PrintWriter(new FileWriter("inventory\\resos.txt"));
-					
+					PrintWriter r = new PrintWriter(new FileWriter("inventory\\resos.txt"));					
 					for(Object a: f.b){
 						r.println(a);
+					}
+					r.close();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+    			try {
+					PrintWriter r = new PrintWriter(new FileWriter("inventory\\mods.txt"));					
+					for(Object a: f.mm){
+						Mod m = (Mod)a;
+						r.println(m.getType());
 					}
 					r.close();
 				} catch (IOException e1) {
@@ -60,18 +70,22 @@ public class Frame {
     				for(Portal p:f.portals){
     				try {
 						PrintWriter port = new PrintWriter(new FileWriter("portals\\" + p.namee() + ".txt"));
-						port.println(p.retX());
-						port.println(p.retY());
-						port.println(p.team());
-						port.println(p.numReses());
+						port.println("x"+p.retX());
+						port.println("y"+p.retY());
+						port.println("t"+p.team());
+						port.println("n"+p.mods.size());
+						for(Mod m:p.mods){
+							port.println("m"+m.getType());
+						}
+						port.println("r"+p.numReses());
 						for(Resonator re:p.resonators){
-							port.println(re.getLevel());
+							port.println("l"+re.getLevel());
 							port.println(re.getX());
 							port.println(re.getY());
 						}
-						port.println(p.links);
+						port.println("w"+p.links);
 						for(String s:p.linked){
-							port.println(s);
+							port.println("z"+s);
 						}
 						port.close();
 					} catch (IOException e1) {
@@ -102,6 +116,9 @@ public class Frame {
         					fieldin.println(ff.getP2y());
         					fieldin.println(ff.getP3x());
         					fieldin.println(ff.getP3y());
+        					fieldin.println(ff.p1.name);
+        					fieldin.println(ff.p2.name);
+        					fieldin.println(ff.p3.name);
         					fieldin.println(ff.getTeam());
         				}
     					fieldin.close();

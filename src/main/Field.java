@@ -1,5 +1,7 @@
 package main;
 
+import java.util.ArrayList;
+
 public class Field {
 	int p1x;
 	int p1y;
@@ -7,8 +9,10 @@ public class Field {
 	int p2y;
 	int p3x;
 	int p3y;
+	Portal p1,p2,p3;
 	String team;
-	public Field(int a,int b,int c,int d,int e,int f,String g){
+	ArrayList<Portal> porta = new ArrayList<Portal>();
+	public Field(int a,int b,int c,int d,int e,int f,String g,Portal p1,Portal p2, Portal p3){
 		p1x = a;
 		p1y = b;
 		p2x = c;
@@ -16,6 +20,12 @@ public class Field {
 		p3x = e;
 		p3y = f;
 		team = g;
+		this.p1 = p1;
+		this.p2 = p2;
+		this.p3 = p3;
+		porta.add(p1);
+		porta.add(p2);
+		porta.add(p3);
 	}
 
 	public int getP1x() {
